@@ -20,42 +20,52 @@ const AuthForm = () => {
     const enteredPassword = passwordInputRef.current.value;
 
     // optional: Add validation
-
+    let url;
     if (isLogin) {
-      // handle login
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAvUxVH0Ni67C82Vw4H6UR4wHCan2vbG_A";
     } else {
+      url =
+      "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAvUxVH0Ni67C82Vw4H6UR4wHCan2vbG_A";
       setSignupInProgress(true); // set signup in progress
       setSignupSuccess(""); // reset signup success message
       setShowError(""); // reset error message
-
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAvUxVH0Ni67C82Vw4H6UR4wHCan2vbG_A",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: enteredEmail,
-            password: enteredPassword,
-            returnSecureToken: true,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-        .then((res) => {
-          if (res.ok) {
-            setSignupSuccess("Signup Successful, you may login");
-            setShowError("");
-          } else {
-            return res.json().then((data) => {
-              setShowError(data.error.message);
-            });
-          }
-        })
-        .finally(() => {
-          setSignupInProgress(false); // reset signup in progress
-        });
     }
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.ok) {
+          if(!isLogin){
+            setSignupSuccess("Signup Successful, you may login");
+          }
+          
+          setShowError("");
+          return res.json()
+        } else {
+          return res.json().then((data) => {
+            setShowError(data.error.message);
+            let errorMessage = 'Authentication Failed'
+            throw new Error(errorMessage)
+          });
+        }
+      }).then((data) => {
+        console.log(data)
+      }).catch((err) => {
+        alert(err.message)
+      }
+      )
+      .finally(() => {
+        setSignupInProgress(false); // reset signup in progress
+      });
   };
 
   return (
@@ -68,7 +78,12 @@ const AuthForm = () => {
         </div>
         <div className={classes.control}>
           <label htmlFor="password">Your Password</label>
-          <input type="password" id="password" required ref={passwordInputRef} />
+          <input
+            type="password"
+            id="password"
+            required
+            ref={passwordInputRef}
+          />
         </div>
         <div className={classes.actions}>
           {signupInProgress ? (
