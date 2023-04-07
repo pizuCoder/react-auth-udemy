@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
-
+import { useState, useRef, useContext } from "react";
+import AuthContext from "../store/auth-context";
 import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
+  const authCtx = useContext(AuthContext)
   const [isLogin, setIsLogin] = useState(true);
   const [showError, setShowError] = useState("");
   const [signupInProgress, setSignupInProgress] = useState(false);
@@ -18,6 +19,7 @@ const AuthForm = () => {
     event.preventDefault();
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
+    
 
     // optional: Add validation
     let url;
@@ -58,7 +60,8 @@ const AuthForm = () => {
           });
         }
       }).then((data) => {
-        console.log(data)
+        // console.log(data)
+        authCtx.login(data.idToken)
       }).catch((err) => {
         alert(err.message)
       }
